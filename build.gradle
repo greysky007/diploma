@@ -5,6 +5,8 @@ plugins {
 
 group 'ru.netology'
 version '1.0-SNAPSHOT'
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
 
 repositories {
     mavenCentral()
@@ -15,6 +17,9 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     testImplementation 'com.github.javafaker:javafaker:1.0.1'
     testImplementation 'com.codeborne:selenide:5.19.0'
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+    testImplementation 'commons-dbutils:commons-dbutils:1.7'
+    testImplementation 'mysql:mysql-connector-java:8.0.18'
 }
 
 test {

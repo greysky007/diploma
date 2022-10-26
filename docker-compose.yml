@@ -18,3 +18,16 @@ services:
     image: node-app:1.0
     ports:
       - '9999:9999'
+
+  postgres:
+
+    image: postgres:latest
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./data:/var/lib
+    environment:
+
+      POSTGRES_DB: app
+      POSTGRES_USER: app-line
+      POSTGRES_PASSWORD: 12345
