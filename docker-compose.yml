@@ -14,18 +14,17 @@ services:
       - MYSQL_PASSWORD=12345
 
   node-app:
-    build: .
+    build: ./gate-simulator
     image: node-app:1.0
     ports:
       - '9999:9999'
 
-  postgres:
+  postgresdb:
 
     image: postgres:latest
     ports:
       - '5432:5432'
-    volumes:
-      - ./data:/var/lib
+
     environment:
 
       POSTGRES_DB: app

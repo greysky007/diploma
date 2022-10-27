@@ -65,5 +65,17 @@ public class DataHelper {
 
         return new CardInfo(cardNum, month, year, cardholder, cvc);
     }
+    public static CardInfo getCardInfo(String card, String month) {
+        Faker faker = new Faker(new Locale("en"));
+        String cardNum = card;
+        String monthNum = month;
+        String year = generateDate();
+
+
+        String cardholder = faker.name().fullName();
+        String cvc = String.valueOf(faker.number().numberBetween(100, 999));
+
+        return new CardInfo(cardNum, month, year, cardholder, cvc);
+    }
 }
 
