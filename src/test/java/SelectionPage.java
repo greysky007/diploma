@@ -1,12 +1,13 @@
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
+import lombok.Getter;
 
 import java.time.Duration;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.$$x;
 import static com.codeborne.selenide.Selenide.$x;
-
+@Getter
 public class SelectionPage {
     private SelenideElement buttonBuy = $x("//span[text() = 'Купить']");
     private SelenideElement buttonWithCredit = $x("//span[text() = 'Купить в кредит']");
@@ -16,12 +17,41 @@ public class SelectionPage {
     private SelenideElement cardHolder = $x("//span[text() = 'Владелец']/..//input");
     private SelenideElement cvcCode = $x("//span[text() = 'CVC/CVV']/..//input");
     private SelenideElement buttonNext = $x("//span[text()='Продолжить']/../..");
-    private ElementsCollection success =
-            $$x("//div[contains(@class, 'notification_status')]");
-    private SelenideElement suc = $x("//div[contains(@class, 'notification_status_ok')]");
-    private SelenideElement error = $x("//div[contains(@class, 'notification_status_error')]");
 
-    public void buyWithoutCredit(DataHelper.CardInfo info) {
+    private SelenideElement cardholderSubEmptyField =
+            $x("//span[@class = 'input__top' and text() = 'Владелец']/..//span[text()='Поле обязательно для заполнения']");
+    private SelenideElement cardholderSubErrorInput =
+            $x("//span[@class = 'input__top' and text() = 'Владелец']/..//span[text()='Неверный формат имени']");
+
+
+    private SelenideElement incorrectExpirationMonth =
+            $x("//span[@class = 'input__top' and text() = 'Месяц']/..//span[text()='Неверно указан срок действия карты']");
+    private SelenideElement incorrectMonthFormat =
+            $x("//span[@class = 'input__top' and text() = 'Месяц']/..//span[text()='Неверный формат']");
+
+    private SelenideElement incorrectExpirationYear =
+            $x("//span[@class = 'input__top' and text() = 'Год']/..//span[text()='Неверно указан срок действия карты']");
+    private SelenideElement incorrectYearFormat =
+            $x("//span[@class = 'input__top' and text() = 'Год']/..//span[text()='Неверный формат']");
+    private SelenideElement expiredYear =
+            $x("//span[@class = 'input__top' and text() = 'Год']/..//span[text()='Истёк срок действия карты']");
+
+
+    private SelenideElement incorrectCVCFormat =
+            $x("//span[@class = 'input__top' and text() = 'CVC/CVV']/..//span[text()='Неверный формат']");
+
+
+
+    private SelenideElement successMessage = $x("//div[contains(@class, 'notification_status_ok')]");
+    private SelenideElement errorMessage = $x("//div[contains(@class, 'notification_status_error')]");
+
+    public void buyWithoutCredit(String num, String month, String year, String cardholder, String cvc) {
+        Card info = new Card();
+        info.setCardNum(num);
+        info.setMonth(month);
+        info.setYear(year);
+        info.setCardholder(cardholder);
+        info.setCvc(cvc);
         buttonBuy.click();
         numberField.setValue(info.getCardNum());
         monthField.setValue(info.getMonth());
@@ -29,8 +59,8 @@ public class SelectionPage {
         cardHolder.setValue(info.getCardholder());
         cvcCode.setValue(info.getCvc());
         buttonNext.click();
-        suc.shouldBe(visible, Duration.ofSeconds(15));
-        error.shouldBe(hidden, Duration.ofSeconds(0, 5));
+        //successMessage.shouldBe(visible, Duration.ofSeconds(15));
+        //errorMessage.shouldBe(hidden, Duration.ofSeconds(0, 5));
         //success.exclude(hidden).last().shouldBe(visible, Duration.ofSeconds(10));
 
     }
@@ -43,9 +73,17 @@ public class SelectionPage {
         cardHolder.setValue(info.getCardholder());
         cvcCode.setValue(info.getCvc());
         buttonNext.click();
-        suc.shouldBe(visible, Duration.ofSeconds(15));
-        error.shouldBe(hidden, Duration.ofSeconds(0, 5));
+        //successMessage.shouldBe(visible, Duration.ofSeconds(15));
+        //errorMessage.shouldBe(hidden, Duration.ofSeconds(0, 5));
 
+    }
+
+    public void successBuy() {
+        successMessage.shouldBe(visible, Duration.ofSeconds(15));
+    }
+
+    public void errorBuy() {
+        errorMessage.shouldBe(visible, Duration.ofSeconds(15));
     }
 
 

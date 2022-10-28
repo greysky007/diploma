@@ -8,7 +8,7 @@ import java.sql.DriverManager;
 @UtilityClass
 
 public class DataToBase {
-    private static String url = System.getProperty("db.url");
+    //private static String url = System.getProperty("db.url");
     @SneakyThrows
     public static String selection(String table) {
         var runner = new QueryRunner();
@@ -17,7 +17,7 @@ public class DataToBase {
 
         try (
                 var conn = DriverManager
-                        .getConnection(url, "app-line", "12345");
+                        .getConnection("jdbc:mysql://localhost:3306/app", "app-line", "12345");
 
         ) {
 
@@ -35,7 +35,7 @@ public class DataToBase {
         String delete = "DELETE from credit_request_entity;";
         try (
                 var conn = DriverManager
-                        .getConnection(url, "app-line", "12345");
+                        .getConnection("jdbc:mysql://localhost:3306/app", "app-line", "12345");
 
         ) {
             runner.update(conn, delete);
@@ -52,7 +52,7 @@ public class DataToBase {
         String deleteUsers = "DELETE from payment_entity;";
         try (
                 var conn = DriverManager
-                        .getConnection(url, "app-line", "12345");
+                        .getConnection("jdbc:mysql://localhost:3306/app", "app-line", "12345");
 
         ) {
             runner.update(conn, deleteCards);
