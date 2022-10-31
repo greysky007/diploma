@@ -1,12 +1,11 @@
-import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 import lombok.Getter;
 
 import java.time.Duration;
 
 import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selenide.$$x;
 import static com.codeborne.selenide.Selenide.$x;
+
 @Getter
 public class SelectionPage {
     private SelenideElement buttonBuy = $x("//span[text() = 'Купить']");
@@ -41,17 +40,10 @@ public class SelectionPage {
             $x("//span[@class = 'input__top' and text() = 'CVC/CVV']/..//span[text()='Неверный формат']");
 
 
-
     private SelenideElement successMessage = $x("//div[contains(@class, 'notification_status_ok')]");
     private SelenideElement errorMessage = $x("//div[contains(@class, 'notification_status_error')]");
 
-    public void buyWithoutCredit(String num, String month, String year, String cardholder, String cvc) {
-        Card info = new Card();
-        info.setCardNum(num);
-        info.setMonth(month);
-        info.setYear(year);
-        info.setCardholder(cardholder);
-        info.setCvc(cvc);
+    public void buyWithoutCredit(Card info) {
         buttonBuy.click();
         numberField.setValue(info.getCardNum());
         monthField.setValue(info.getMonth());
@@ -59,13 +51,11 @@ public class SelectionPage {
         cardHolder.setValue(info.getCardholder());
         cvcCode.setValue(info.getCvc());
         buttonNext.click();
-        //successMessage.shouldBe(visible, Duration.ofSeconds(15));
-        //errorMessage.shouldBe(hidden, Duration.ofSeconds(0, 5));
-        //success.exclude(hidden).last().shouldBe(visible, Duration.ofSeconds(10));
+
 
     }
 
-    public void buyWithCredit(DataHelper.CardInfo info) {
+    public void buyWithCredit(Card info) {
         buttonWithCredit.click();
         numberField.setValue(info.getCardNum());
         monthField.setValue(info.getMonth());
@@ -73,8 +63,6 @@ public class SelectionPage {
         cardHolder.setValue(info.getCardholder());
         cvcCode.setValue(info.getCvc());
         buttonNext.click();
-        //successMessage.shouldBe(visible, Duration.ofSeconds(15));
-        //errorMessage.shouldBe(hidden, Duration.ofSeconds(0, 5));
 
     }
 
