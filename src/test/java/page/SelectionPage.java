@@ -1,4 +1,7 @@
+package page;
+
 import com.codeborne.selenide.SelenideElement;
+import data.Card;
 import lombok.Getter;
 
 import java.time.Duration;

@@ -1,3 +1,5 @@
+package data;
+
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.dbutils.QueryRunner;

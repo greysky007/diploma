@@ -1,8 +1,13 @@
+package test;
+
 import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.commands.ShouldBe;
 import com.codeborne.selenide.logevents.SelenideLogger;
+import data.Card;
+import data.DataHelp;
+import data.DataToBase;
 import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.*;
+import page.SelectionPage;
 
 
 import static com.codeborne.selenide.Condition.visible;
