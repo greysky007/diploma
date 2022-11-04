@@ -28,7 +28,7 @@ public class ShopTest {
     public void setUp() {
 
         Configuration.holdBrowserOpen = false;
-        Configuration.headless = false;
+        Configuration.headless = true;
 
         open("http://localhost:8080");
 
@@ -45,14 +45,6 @@ public class ShopTest {
         SelenideLogger.removeListener("allure");
     }
 
-    @Test
-    public void buy() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, validCVC);
-        var page = new MainPage();
-        page.ordinaryBuy().purchaseSuccess(info);
-        Assertions.assertEquals(DataToBase.APPROVED_STATUS, DataToBase.selection(DataToBase.DEBIT));
-
-    }
 
     //тесты без кредита
     //тесты positive================
