@@ -76,12 +76,3 @@ public class OrdinaryPurchasePage {
 
     }
 }
-//    public SelenideElement successBuy() {
-//        return successMessage.shouldBe(visible, Duration.ofSeconds(15));
-//
-//    }
-//
-//    public void errorBuy() {
-//        errorMessage.shouldBe(visible, Duration.ofSeconds(15));
-//    }
-//}
