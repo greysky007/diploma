@@ -10,12 +10,17 @@ import java.sql.DriverManager;
 @UtilityClass
 
 public class DataToBase {
+    public final String APPROVED_STATUS = "APPROVED";
+    public final String DECLINE_STATUS = "DECLINED";
+    public final String DEBIT = "payment_entity";
+    public final String CREDIT = "credit_request_entity";
+
     private static String url = System.getProperty("db.url");
     @SneakyThrows
     public static String selection(String table) {
         var runner = new QueryRunner();
 
-        String select = "select status FROM "+table+";";
+        String select = "select status FROM " + table + ";";
 
         try (
                 var conn = DriverManager
@@ -30,7 +35,6 @@ public class DataToBase {
 
         }
     }
-
 
 
     @SneakyThrows

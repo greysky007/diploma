@@ -6,13 +6,11 @@ import lombok.Getter;
 
 import java.time.Duration;
 
-import static com.codeborne.selenide.Condition.*;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$x;
 
 @Getter
-public class SelectionPage {
-    private SelenideElement buttonBuy = $x("//span[text() = 'Купить']");
-    private SelenideElement buttonWithCredit = $x("//span[text() = 'Купить в кредит']");
+public class CreditPurchasePage {
     private SelenideElement numberField = $x("//span[text() = 'Номер карты']/..//input");
     private SelenideElement monthField = $x("//span[text() = 'Месяц']/..//input");
     private SelenideElement yearField = $x("//span[text() = 'Год']/..//input");
@@ -46,38 +44,36 @@ public class SelectionPage {
     private SelenideElement successMessage = $x("//div[contains(@class, 'notification_status_ok')]");
     private SelenideElement errorMessage = $x("//div[contains(@class, 'notification_status_error')]");
 
-    public void buyWithoutCredit(Card info) {
-        buttonBuy.click();
+    public OrdinaryPurchasePage purchase(Card info) {
         numberField.setValue(info.getCardNum());
         monthField.setValue(info.getMonth());
         yearField.setValue(info.getYear());
         cardHolder.setValue(info.getCardholder());
         cvcCode.setValue(info.getCvc());
         buttonNext.click();
-
-
+        return new OrdinaryPurchasePage();
     }
 
-    public void buyWithCredit(Card info) {
-        buttonWithCredit.click();
+    public SelenideElement purchaseSuccess(Card info) {
         numberField.setValue(info.getCardNum());
         monthField.setValue(info.getMonth());
         yearField.setValue(info.getYear());
         cardHolder.setValue(info.getCardholder());
         cvcCode.setValue(info.getCvc());
         buttonNext.click();
+        return successMessage.shouldBe(visible, Duration.ofSeconds(15));
 
     }
 
-    public void successBuy() {
-        successMessage.shouldBe(visible, Duration.ofSeconds(15));
+    public SelenideElement purchaseError(Card info) {
+        numberField.setValue(info.getCardNum());
+        monthField.setValue(info.getMonth());
+        yearField.setValue(info.getYear());
+        cardHolder.setValue(info.getCardholder());
+        cvcCode.setValue(info.getCvc());
+        buttonNext.click();
+        return errorMessage.shouldBe(visible, Duration.ofSeconds(15));
+
     }
-
-    public void errorBuy() {
-        errorMessage.shouldBe(visible, Duration.ofSeconds(15));
-    }
-
-
 }
-
 
