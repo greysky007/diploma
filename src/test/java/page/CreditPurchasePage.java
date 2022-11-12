@@ -1,15 +1,15 @@
 package page;
 
+import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
 import data.Card;
-import lombok.Getter;
 
 import java.time.Duration;
 
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$x;
 
-@Getter
+
 public class CreditPurchasePage {
     private SelenideElement numberField = $x("//span[text() = 'Номер карты']/..//input");
     private SelenideElement monthField = $x("//span[text() = 'Месяц']/..//input");
@@ -21,7 +21,7 @@ public class CreditPurchasePage {
     private SelenideElement cardholderSubEmptyField =
             $x("//span[@class = 'input__top' and text() = 'Владелец']/..//span[text()='Поле обязательно для заполнения']");
     private SelenideElement cardholderSubErrorInput =
-            $x("//span[@class = 'input__top' and text() = 'Владелец']/..//span[text()='Неверный формат имени']");
+            $x("//span[@class = 'input__top' and text() = 'Владелец']/..//span[text()='Неверный формат']");
 
 
     private SelenideElement incorrectExpirationMonth =
@@ -44,36 +44,54 @@ public class CreditPurchasePage {
     private SelenideElement successMessage = $x("//div[contains(@class, 'notification_status_ok')]");
     private SelenideElement errorMessage = $x("//div[contains(@class, 'notification_status_error')]");
 
-    public OrdinaryPurchasePage purchase(Card info) {
+    public CreditPurchasePage purchase(Card info) {
         numberField.setValue(info.getCardNum());
         monthField.setValue(info.getMonth());
         yearField.setValue(info.getYear());
         cardHolder.setValue(info.getCardholder());
         cvcCode.setValue(info.getCvc());
         buttonNext.click();
-        return new OrdinaryPurchasePage();
+        return this;
     }
 
-    public SelenideElement purchaseSuccess(Card info) {
-        numberField.setValue(info.getCardNum());
-        monthField.setValue(info.getMonth());
-        yearField.setValue(info.getYear());
-        cardHolder.setValue(info.getCardholder());
-        cvcCode.setValue(info.getCvc());
-        buttonNext.click();
-        return successMessage.shouldBe(visible, Duration.ofSeconds(15));
-
+    public void successMessage() {
+        successMessage.shouldBe(visible, Duration.ofSeconds(15));
     }
 
-    public SelenideElement purchaseError(Card info) {
-        numberField.setValue(info.getCardNum());
-        monthField.setValue(info.getMonth());
-        yearField.setValue(info.getYear());
-        cardHolder.setValue(info.getCardholder());
-        cvcCode.setValue(info.getCvc());
-        buttonNext.click();
-        return errorMessage.shouldBe(visible, Duration.ofSeconds(15));
+    public void errorMessage() {
+        errorMessage.shouldBe(visible, Duration.ofSeconds(15));
+    }
+    public void getCardholderSubErrorInput(String text){
+        cardholderSubErrorInput.shouldBe(visible).shouldHave(Condition.exactText(text));
+    }
+    public void getCardholderSubEmptyField(String text){
+        cardholderSubEmptyField.shouldBe(visible).shouldHave(Condition.exactText(text));
+    }
+    public void getExpiredYear(String text){
+        expiredYear.shouldBe(visible).shouldHave(Condition.exactText(text));
+    }
+    public void getIncorrectYearFormat(String text){
+        incorrectYearFormat.shouldBe(visible).shouldHave(Condition.exactText(text));
+    }
+    public void getIncorrectExpirationYear(String text){
+        incorrectExpirationYear.shouldBe(visible).shouldHave(Condition.exactText(text));
+    }
+    public void getIncorrectExpirationMonth(String text){
+        incorrectExpirationMonth.shouldBe(visible).shouldHave(Condition.exactText(text));
+    }
 
+    public void getIncorrectMonthFormat(String text){
+        incorrectMonthFormat.shouldBe(visible).shouldHave(Condition.exactText(text));
+    }
+    public void getIncorrectCVCFormat(String text){
+        incorrectCVCFormat.shouldBe(visible).shouldHave(Condition.exactText(text));
+    }
+    public String getMonthField(){
+
+        return monthField.getValue();
+    }
+    public String getCvcCode(){
+        return cvcCode.getValue();
     }
 }
 

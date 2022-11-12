@@ -10,13 +10,13 @@ import org.junit.jupiter.api.*;
 import page.MainPage;
 
 
-import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.open;
 
 public class ShopTest {
     private String validMonth = DataHelp.generateMonth(0);
     private String validYear = DataHelp.generateYear(0);
     private String validCardholder = DataHelp.generateCardholder();
+    private String invalidCardholderName = DataHelp.generateInvalidCardholder();
     private String validCVC = DataHelp.generateCVC();
 
     @BeforeAll
@@ -28,7 +28,7 @@ public class ShopTest {
     public void setUp() {
 
         Configuration.holdBrowserOpen = false;
-        Configuration.headless = true;
+        Configuration.headless = false;
 
         open("http://localhost:8080");
 
@@ -51,9 +51,11 @@ public class ShopTest {
     @Test
 
     public void shouldTestValidData() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, validCVC);
         var page = new MainPage();
-        page.ordinaryBuy().purchaseSuccess(info);
+        page.ordinaryBuy()
+                .purchase(info)
+                .successMessage();
         Assertions.assertEquals(DataToBase.APPROVED_STATUS, DataToBase.selection(DataToBase.DEBIT));
 
     }
@@ -62,9 +64,11 @@ public class ShopTest {
     @Test
 
     public void shouldTestWithoutCreditDeclinedCard() {
-        var info = Card.setCardInfo(DataHelp.DECLINED_CARD, validMonth, validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.DECLINED_CARD, validMonth, validYear, validCardholder, validCVC);
         var page = new MainPage();
-        page.ordinaryBuy().purchaseError(info);
+        page.ordinaryBuy()
+                .purchase(info)
+                .errorMessage();
         Assertions.assertEquals(DataToBase.DECLINE_STATUS, DataToBase.selection(DataToBase.DEBIT));
     }
 
@@ -72,47 +76,46 @@ public class ShopTest {
     @Test
 
     public void shouldTestCardholderRus() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, "Иван Иванов", validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, invalidCardholderName, validCVC);
         MainPage page = new MainPage();
         page.ordinaryBuy()
                 .purchase(info)
-                .getCardholderSubErrorInput()
-                .shouldBe(visible);
+                .getCardholderSubErrorInput(DataHelp.WRONG_FORMAT_MSG);
+
     }
 
     @Test
 
     public void shouldTestCardholderDigits() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, "123", validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, DataHelp.generateDigit(), validCVC);
         MainPage page = new MainPage();
         page.ordinaryBuy()
                 .purchase(info)
-                .getCardholderSubErrorInput()
-                .shouldBe(visible);
+                .getCardholderSubErrorInput(DataHelp.WRONG_FORMAT_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestCardholderSymbols() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, "?!", validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, DataHelp.generateSymbol(), validCVC);
         MainPage page = new MainPage();
         page.ordinaryBuy()
                 .purchase(info)
-                .getCardholderSubErrorInput()
-                .shouldBe(visible);
+                .getCardholderSubErrorInput(DataHelp.WRONG_FORMAT_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestCardholderEmpty() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, " ", validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, " ", validCVC);
         MainPage page = new MainPage();
         page.ordinaryBuy()
                 .purchase(info)
-                .getCardholderSubErrorInput()
-                .shouldBe(visible);
+                .getCardholderSubErrorInput(DataHelp.WRONG_FORMAT_MSG);
 
     }
 
@@ -120,36 +123,35 @@ public class ShopTest {
     @Test
 
     public void shouldTestYearExpiredCard() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, DataHelp.generateYear(-1), validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, DataHelp.generateYear(-1), validCardholder, validCVC);
         MainPage page = new MainPage();
         page.ordinaryBuy()
                 .purchase(info)
-                .getExpiredYear()
-                .shouldBe(visible);
+                .getExpiredYear(DataHelp.EXPIRED_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestYearIncorrectFormat() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, "1", validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, "1", validCardholder, validCVC);
         MainPage page = new MainPage();
         page.ordinaryBuy()
                 .purchase(info)
-                .getIncorrectYearFormat()
-                .shouldBe(visible);
+                .getIncorrectYearFormat(DataHelp.WRONG_FORMAT_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestYearIncorrectExpiration() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, DataHelp.generateYear(6), validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, DataHelp.generateYear(6), validCardholder, validCVC);
         MainPage page = new MainPage();
         page.ordinaryBuy()
                 .purchase(info)
-                .getIncorrectExpirationYear()
-                .shouldBe(visible);
+                .getIncorrectExpirationYear(DataHelp.INVALID_EXPIRATION_MSG);
 
     }
 
@@ -157,61 +159,59 @@ public class ShopTest {
     @Test
 
     public void shouldTestMonthIncorrectExpiration() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, DataHelp.generateMonth(-1), validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, DataHelp.generateMonth(-1), validYear, validCardholder, validCVC);
         MainPage page = new MainPage();
         page.ordinaryBuy()
                 .purchase(info)
-                .getIncorrectExpirationMonth()
-                .shouldBe(visible);
+                .getIncorrectExpirationMonth(DataHelp.INVALID_EXPIRATION_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestMonthIncorrectFormat() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, "1", validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, "1", validYear, validCardholder, validCVC);
         MainPage page = new MainPage();
         page.ordinaryBuy()
                 .purchase(info)
-                .getIncorrectMonthFormat()
-                .shouldBe(visible);
+                .getIncorrectMonthFormat(DataHelp.WRONG_FORMAT_MSG);
 
     }
 
     @Test
 
     public void shouldTestMonthEmpty() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, "", validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, "", validYear, validCardholder, validCVC);
         MainPage page = new MainPage();
         page.ordinaryBuy()
                 .purchase(info)
-                .getIncorrectMonthFormat()
-                .shouldBe(visible);
+                .getIncorrectMonthFormat(DataHelp.WRONG_FORMAT_MSG);
 
     }
 
     @Test
 
     public void shouldTestMonth_00() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, "00", validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, "00", validYear, validCardholder, validCVC);
         MainPage page = new MainPage();
         page.ordinaryBuy()
                 .purchase(info)
-                .getIncorrectExpirationMonth()
-                .shouldBe(visible);
+                .getIncorrectExpirationMonth(DataHelp.INVALID_EXPIRATION_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestMonth_13() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, "13", validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, "13", validYear, validCardholder, validCVC);
         MainPage page = new MainPage();
         String result = page
                 .ordinaryBuy()
                 .purchase(info)
-                .getMonthField()
-                .getValue();
+                .getMonthField();
+
         Assertions.assertEquals("", result);
     }
 
@@ -219,64 +219,64 @@ public class ShopTest {
     //    //тесты поля cvc===========
     @Test
     public void shouldTestCVCIncorrectFormat() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, "20");
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, "20");
         MainPage page = new MainPage();
         page.ordinaryBuy()
                 .purchase(info)
-                .getIncorrectCVCFormat()
-                .shouldBe(visible);
+                .getIncorrectCVCFormat(DataHelp.WRONG_FORMAT_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestCVCInputLetters() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, "qwe");
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, DataHelp.generateLetter());
         MainPage page = new MainPage();
         String result = page
                 .ordinaryBuy()
                 .purchase(info)
-                .getCvcCode()
-                .getValue();
+                .getCvcCode();
+
         Assertions.assertEquals("", result);
     }
 
     @Test
 
     public void shouldTestCVCInputSymbols() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, "!");
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, DataHelp.generateSymbol());
         MainPage page = new MainPage();
         String result = page
                 .ordinaryBuy()
                 .purchase(info)
-                .getCvcCode()
-                .getValue();
+                .getCvcCode();
+
         Assertions.assertEquals("", result);
     }
 
     @Test
 
     public void shouldTestCVCInputSpace() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, " ");
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, " ");
         MainPage page = new MainPage();
         String result = page
                 .ordinaryBuy()
                 .purchase(info)
-                .getCvcCode()
-                .getValue();
+                .getCvcCode();
+
         Assertions.assertEquals("", result);
     }
 
     @Test
 
     public void shouldTestCVCInputFourDigits() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, "1234");
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, "1234");
         MainPage page = new MainPage();
         String result = page
                 .ordinaryBuy()
                 .purchase(info)
-                .getCvcCode()
-                .getValue();
+                .getCvcCode();
+
         Assertions.assertEquals("123", result);
     }
 
@@ -286,10 +286,11 @@ public class ShopTest {
     @Test
 
     public void shouldTestValidDataWithCredit() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, validCVC);
         MainPage page = new MainPage();
         page.creditBuy()
-                .purchaseSuccess(info);
+                .purchase(info)
+                .successMessage();
         Assertions.assertEquals(DataToBase.APPROVED_STATUS, DataToBase.selection(DataToBase.CREDIT));
     }
 
@@ -297,10 +298,11 @@ public class ShopTest {
     @Test
 
     public void shouldTestWithCreditDeclinedCard() {
-        var info = Card.setCardInfo(DataHelp.DECLINED_CARD, validMonth, validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.DECLINED_CARD, validMonth, validYear, validCardholder, validCVC);
         MainPage page = new MainPage();
         page.creditBuy()
-                .purchaseError(info);
+                .purchase(info)
+                .errorMessage();
         Assertions.assertEquals(DataToBase.DECLINE_STATUS, DataToBase.selection(DataToBase.CREDIT));
     }
 
@@ -308,48 +310,48 @@ public class ShopTest {
     @Test
 
     public void shouldTestCreditCardholderRus() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, "Иван Иванов", validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, invalidCardholderName, validCVC);
         MainPage page = new MainPage();
         page.creditBuy()
                 .purchase(info)
-                .getCardholderSubErrorInput()
-                .shouldBe(visible);
+                .getCardholderSubErrorInput(DataHelp.WRONG_FORMAT_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestCreditCardholderDigits() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, "123", validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, DataHelp.generateDigit(), validCVC);
         MainPage page = new MainPage();
         page.creditBuy()
                 .purchase(info)
-                .getCardholderSubErrorInput()
-                .shouldBe(visible);
+                .getCardholderSubErrorInput(DataHelp.WRONG_FORMAT_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestCreditCardholderSymbols() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, "?!", validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, DataHelp.generateSymbol(), validCVC);
         MainPage page = new MainPage();
         page.creditBuy()
                 .purchase(info)
-                .getCardholderSubErrorInput()
-                .shouldBe(visible);
+                .getCardholderSubErrorInput(DataHelp.WRONG_FORMAT_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestCreditCardholderEmpty() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, " ", validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, " ", validCVC);
         MainPage page = new MainPage();
         page.creditBuy()
                 .purchase(info)
-                .getCardholderSubEmptyField()
-                .shouldBe(visible);
+                .getCardholderSubEmptyField(DataHelp.EMPTY_FIELD_MSG);
+
 
     }
 
@@ -357,36 +359,36 @@ public class ShopTest {
     @Test
 
     public void shouldTestCreditYearExpiredCard() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, DataHelp.generateYear(-1), validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, DataHelp.generateYear(-1), validCardholder, validCVC);
         MainPage page = new MainPage();
         page.creditBuy()
                 .purchase(info)
-                .getExpiredYear()
-                .shouldBe(visible);
+                .getExpiredYear(DataHelp.EXPIRED_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestCreditYearIncorrectFormat() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, "1", validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, "1", validCardholder, validCVC);
         MainPage page = new MainPage();
         page.creditBuy()
                 .purchase(info)
-                .getIncorrectYearFormat()
-                .shouldBe(visible);
+                .getIncorrectYearFormat(DataHelp.WRONG_FORMAT_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestCreditYearIncorrectExpiration() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, DataHelp.generateYear(6), validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, DataHelp.generateYear(6), validCardholder, validCVC);
         MainPage page = new MainPage();
         page.creditBuy()
                 .purchase(info)
-                .getIncorrectExpirationYear()
-                .shouldBe(visible);
+                .getIncorrectExpirationYear(DataHelp.INVALID_EXPIRATION_MSG);
+
 
     }
 
@@ -394,24 +396,24 @@ public class ShopTest {
     @Test
 
     public void shouldTestCreditMonthIncorrectExpiration() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, DataHelp.generateMonth(-1), validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, DataHelp.generateMonth(-1), validYear, validCardholder, validCVC);
         MainPage page = new MainPage();
         page.creditBuy()
                 .purchase(info)
-                .getIncorrectExpirationMonth()
-                .shouldBe(visible);
+                .getIncorrectExpirationMonth(DataHelp.INVALID_EXPIRATION_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestCreditMonthIncorrectFormat() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, "1", validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, "1", validYear, validCardholder, validCVC);
         MainPage page = new MainPage();
         page.creditBuy()
                 .purchase(info)
-                .getIncorrectMonthFormat()
-                .shouldBe(visible);
+                .getIncorrectMonthFormat(DataHelp.WRONG_FORMAT_MSG);
+
 
     }
 
@@ -419,37 +421,37 @@ public class ShopTest {
     @Test
 
     public void shouldTestCreditMonthEmpty() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, "", validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, "", validYear, validCardholder, validCVC);
         MainPage page = new MainPage();
         page.creditBuy()
                 .purchase(info)
-                .getIncorrectMonthFormat()
-                .shouldBe(visible);
+                .getIncorrectMonthFormat(DataHelp.WRONG_FORMAT_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestCreditMonth_00() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, "00", validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, "00", validYear, validCardholder, validCVC);
         MainPage page = new MainPage();
         page.creditBuy()
                 .purchase(info)
-                .getIncorrectExpirationMonth()
-                .shouldBe(visible);
+                .getIncorrectExpirationMonth(DataHelp.INVALID_EXPIRATION_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestCreditMonth_13() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, "13", validYear, validCardholder, validCVC);
+        Card info = new Card(DataHelp.APPROVED_CARD, "13", validYear, validCardholder, validCVC);
         MainPage page = new MainPage();
         String result = page
                 .creditBuy()
                 .purchase(info)
-                .getMonthField()
-                .getValue();
+                .getMonthField();
+
 
         Assertions.assertEquals("", result);
     }
@@ -457,64 +459,64 @@ public class ShopTest {
     //    //тесты поля cvc===========
     @Test
     public void shouldTestCreditCVCIncorrectFormat() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, "20");
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, "20");
         MainPage page = new MainPage();
         page.creditBuy()
                 .purchase(info)
-                .getIncorrectCVCFormat()
-                .shouldBe(visible);
+                .getIncorrectCVCFormat(DataHelp.WRONG_FORMAT_MSG);
+
 
     }
 
     @Test
 
     public void shouldTestCreditCVCInputLetters() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, "qwe");
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, DataHelp.generateLetter());
         MainPage page = new MainPage();
         String result = page
                 .creditBuy()
                 .purchase(info)
-                .getCvcCode()
-                .getValue();
+                .getCvcCode();
+
         Assertions.assertEquals("", result);
     }
 
     @Test
 
     public void shouldTestCreditCVCInputSymbols() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, "!");
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, DataHelp.generateSymbol());
         MainPage page = new MainPage();
         String result = page
                 .creditBuy()
                 .purchase(info)
-                .getCvcCode()
-                .getValue();
+                .getCvcCode();
+
         Assertions.assertEquals("", result);
     }
 
     @Test
 
     public void shouldTestCreditCVCInputSpace() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, " ");
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, " ");
         MainPage page = new MainPage();
         String result = page
                 .creditBuy()
                 .purchase(info)
-                .getCvcCode()
-                .getValue();
+                .getCvcCode();
+
         Assertions.assertEquals("", result);
     }
 
     @Test
 
     public void shouldTestCreditCVCInputFourDigits() {
-        var info = Card.setCardInfo(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, "1234");
+        Card info = new Card(DataHelp.APPROVED_CARD, validMonth, validYear, validCardholder, "1234");
         MainPage page = new MainPage();
         String result = page
                 .creditBuy()
                 .purchase(info)
-                .getCvcCode()
-                .getValue();
+                .getCvcCode();
+
         Assertions.assertEquals("123", result);
     }
 }
