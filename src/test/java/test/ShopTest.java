@@ -28,7 +28,7 @@ public class ShopTest {
     public void setUp() {
 
         Configuration.holdBrowserOpen = false;
-        Configuration.headless = false;
+        Configuration.headless = true;
 
         open("http://localhost:8080");
 
