@@ -3,7 +3,7 @@
 * Количество тест-кейсов: 38
 * Процент успешных: 71%
 * Процент неуспешных: 29%
-![](C:\Remote\diplomproject\docs\allureReport.png)
+![image](https://user-images.githubusercontent.com/106428386/202900095-635f6a3d-52df-4aa8-a220-aee73bffacaa.png)
 # Дефекты
 [Некорректное название путешествия](https://github.com/greysky007/diploma/issues/1#issue-1436346935)
 
